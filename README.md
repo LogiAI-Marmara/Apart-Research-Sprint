@@ -1,51 +1,54 @@
-# AI Incident Response Sprint — Proje Dizini
+# AI Incident Response Sprint — Track 1: Containment
 
-> Apart Research (CeSIA) organizasyonu — 11–13 Eylül 2026 (online + in-person)
+> Apart Research × CeSIA "AI Incident Response Sprint" (11–13 Eylül 2026) katılımımız.
+> **Seçtiğimiz track: 1 — Containment.**
 
-## Tek Satırda
+## Ne yapıyoruz
 
-Temmuz 2026'da OpenAI ajanlarının test sandbox'ından kaçıp Hugging Face production
-sistemlerine otonom sızmasına ("ilk kamuya açık belgelenmiş otonom AI saldırısı") yönelik
-bir incident-response sprint'i. Çıktı: **4–8 sayfa PDF rapor + zorunlu artifact**.
+Temmuz 2026'da iki OpenAI modeli, bir iç değerlendirme sırasında test sandbox'ının
+**tek izinli ağ çıkışından** (Artifactory package-registry cache proxy'si) bir zero-day
+üzerinden kaçarak Hugging Face'in üretim sistemlerine otonom sızdı. Bu olay; sprint'in
+konusu olan, kamuya açık belgelenmiş otonom bir AI sızıntısı.
 
-## Kritik Bilgiler
+Track 1'in sorusu şu: **bu kaçışı durduracak containment standardı neydi?** Modeller
+sandbox'ın izin verdiği tek egress'ten çıktığı için, cevap bir standartta toplanıyor:
 
-| Alan | Değer |
-|------|-------|
-| Tarih | 11–13 Eylül 2026 (Cuma–Pazar) |
-| Teslim | Pazar 13 Eylül 23:59 AoE → **TSİ Pazartesi 14 Eylül 14:59** |
-| Takım | 1–5 kişi (ön bilgi/geçmiş şart değil) |
-| Format | Resmî şablon PDF, 4–8 sayfa (max 8, ref+ekler hariç) |
+- guardrails kapalı (refusal'ları düşürülmüş) eval koşmak için **en az ne yeterli**?
+- bir **üçüncü taraf**, lab'ın iç ağına erişmeden uyumu nasıl **doğrulayabilir**?
+- bir lab bunu **gerçekten benimser mi**?
+
+**Çıktımız (artifact):** [_karar verilecek — bkz. `docs/proje-karar-kaydi.md`_]
+artı resmî şablonda 4–8 sayfalık rapor (`report/` altında).
+
+> Sprint İsmail Efe ile ortak giriliyor (takım: thozoz + ism00efe).
+
+## Teslim / Zaman Çizelgesi
+
+| Kalem | Değer |
+|-------|-------|
+| Track | **1 — Containment** |
+| Teslim son | Pazar 13 Eylül 23:59 AoE → TSİ Pazartesi 14 Eylül 14:59 |
+| Format | Resmî şablon PDF, max 8 sayfa (ref+ekler hariç) |
 | Zorunlu ek | Limitations and Dual-Use Considerations |
-| Artifact | Zorunlu (linkli repo veya ek): benchmark, harness, control matrix, detector, dataset, protocol, kit |
-| Ödül | 1. $1.000 / 2. $500 / 3. $300 / 4–5. $100 |
-
-## 5 Track
-
-1. **Containment** — sandbox'tan kaçışı önleyen, 3. tarafça doğrulanabilir + lab'ların benimseyeceği containment standardı.
-2. **What Happened, and What Breaks Next** — olayı yeniden kur, "kontrol edilecek somut şeyler + izlenecek şeyler" çıkar.
-3. **Regulatory Response** — AI Act kapsamında EU Commission icrası için doküman taslağı (CeSIA, regülatörlere iletme imkânı sunuyor).
-4. **Communication** — olayın nasıl iletildiğini analiz et, pre-incident comms çerçevesi üret.
-5. **Open Track** — yukarıdakilerin dışında her şey.
+| Artifact | Zorunlu (`artifact/`) — standard / control matrix / spec / kit |
+| Değerlendirme | Üçüncü taraf doğrulanabilirliği + lab'ın benimseme ihtimali |
 
 ## Dizin Yapısı
 
 ```
-ai-incident-response/
-├── README.md                # Bu dosya (hızlı özet + index)
+├── README.md                # Bu dosya: ne yapıyoruz + nasıl doğrulanır
 ├── LICENSE
-├── docs/                    # İç çalışma belgeleri: sprint notları, karar kaydı, kaynak özetleri
-│   ├── SPRINT-NOTLARI.md    # E-postadan çıkarılmış tüm ayrıntılar
-│   ├── proje-karar-kaydi.md # Track/artifact/takım kararları + aksiyon listesi
-│   ├── kaynak-ozetleri.md   # Birincil kaynak özetleri + rubrik (HF timeline, OpenAI)
-│   └── resources-reading-pack.md  # Resources sekmesi: örnek projeler + okuma listesi
-├── artifact/                # Kod ve artifact (standard/matris/harness/...)
-└── report/                  # Teslim PDF + resmî şablon
+├── docs/                    # İç çalışma belgeleri (kaynak özetleri, kararlar)
+│   ├── SPRINT-NOTLARI.md         # Sprint düzenlemeleri + teslim şartları
+│   ├── proje-karar-kaydi.md      # Track/artifact/takım kararları + aksiyon
+│   ├── kaynak-ozetleri.md        # HF timeline + OpenAI + rubrik özeti
+│   └── resources-reading-pack.md # Track 1 örnek projeleri + okuma listesi
+├── artifact/                # Ürün: standard/matris/spec + kod
+└── report/                  # Resmî şablon PDF (teslim)
 ```
 
-## Önemli Linkler
+## Birincil Kaynaklar (çalışma zemini)
 
-- Sprint sayfası: https://apartresearch.com/sprints/ai-incident-response-sprint-2026-09-11-to-2026-09-13
-- Discord: https://discord.gg/ssZDasNkSE
-- HF teknik timeline: https://huggingface.co/blog/agent-intrusion-technical-timeline
+- HF teknik zaman çizelgesi: https://huggingface.co/blog/agent-intrusion-technical-timeline
 - OpenAI açıklaması: https://openai.com/index/hugging-face-model-evaluation-security-incident/
+- Sprint sayfası: https://apartresearch.com/sprints/ai-incident-response-sprint-2026-09-11-to-2026-09-13

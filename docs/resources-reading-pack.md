@@ -68,27 +68,5 @@
 **Merkezdeki benchmark:**
 - **ExploitGym** — repo (Apache 2.0) · paper (arXiv 2605.11086) · Berkeley RDI yazısı. *V1.0 = 869 instance; paper 898 diyor — 898'i "shipped sayı" olarak aktarma.*
 
-## Reading Pack — Track 2 (hızlı not)
-- **UK AISI — Cheating behaviour (21 Tem):** 5 model × 475 run, %7.8–14.1 kopya.
-- **Anthropic review**, **METR Frontier Risk Report** (üç public payda).
-- **GovAI — Incident Analysis for AI Agents:** developers'ın talep üzerine saklaması gerekenler (activity log, system doc, tool info) — delil-yeterlilik işinden önce oku.
-- **CLTR — Loss of Control Observatory (Şub 2026).**
-- **Redwood — "The OpenAI models that hacked Hugging Face" (25 Tem)** — grader-gaming tezi.
-- **MIT Tech Review (27 Tem)** — "unprecedented" framing'e karşı; başarısızlık insan containment tasarımı diyor.
-- **Reuters (via CNA, 24 Tem)** — tespit timeline'ı; anonim kaynak, doğrulanmamış iddialar (infra'ya bırakılan notlar, bağlantısız monitoring); OpenAI'nin kendi açıklamasıyla gerilimde, bağdaştırmak meşru proje.
-
-## Reading Pack — Track 3 (hızlı not)
-- AB: **Article 55** yükümlülükleri 2 Ağu 2025'ten beri; **icra yetkisi 2 Ağu 2026'dan** (€15M / %3 ciro).
-- **CA: SB 53** (Cal OES portalı halka açık; §22757.15 framework uyumsuzluğunu bağımsız icra edilebilir yapıyor).
-- **NY: RAISE Act** 72 saat "reasonable belief" saati.
-- ABD federal: AI Kill Switch Act (red-team carve-out'u bu olay deliyor), AI Incident Reporting Act.
-- **OECD common reporting framework** (29 kriter, 7 zorunlu) — EU/CA ile birlikte doldurunca 4-rejim karşılaştırması.
-
-## Reading Pack — Track 4/5 (hızlı not)
-- **Defensive Refusal Bias (arXiv 2603.01246):** 2.390 NCCDC prompt, %12.2 refusal; güvenlik anahtar kelimeleri 2.72×; yetkilendirme artırıyor (%21.8 vs %11.6).
-- **Gray Swan Cybersecurity Refusal Framework (arXiv 2606.02644)** · **Meta CyberSecEval** (MITRE FRR + CyberSOCEval).
-- **RAND/AISI/Mila cabinet-level exercises (1 Tem 2026)** — tabletop tasarım referansı (ama senaryo "kendi modelinin kaçıp üçüncü tarafa saldırması" değil; gap burada).
-- **OECD AI Incidents Monitor · AI Incident Database · MIT AI Incident Tracker (+FLARE-AI).**
-
 ## Önemli: 15-dakika notlanabilirlik kısıtı
 *"Her track, bir jürinin (idealde) 15 dakikadan kısa sürede notlayabileceği bir artifact ile tanımlanır — bu, ana tasarım kısıtlarından biri."* → Artifact'in 15 dk'da kavranabilir ve notlanabilir olması şart.

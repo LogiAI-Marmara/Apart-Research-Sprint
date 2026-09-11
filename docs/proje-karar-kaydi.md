@@ -26,7 +26,6 @@
 - 8 sayfa sınırı sıkı.
 - Artifact olmadan teslim eksik sayılır.
 - Limitations + dual-use eki **zorunlu**, unutma.
-- Track 3 seçilirse hukuki doğruluk kritik — uydurma referans felaket olur (kaynakları birebir doğrula).
 
 ## Teslim Tarihi
 
