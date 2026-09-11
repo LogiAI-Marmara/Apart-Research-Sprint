@@ -1,0 +1,24 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Node
+node_modules/
+
+# Build / export artifacts (final PDF lives in report/ only, but keep noise out)
+artifact/build/
+dist/
+
+# Local-only notes
+.claude/settings.local.json
