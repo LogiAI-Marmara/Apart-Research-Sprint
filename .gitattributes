@@ -1,0 +1,26 @@
+# Satır sonu politikası: repoda ve index'te daima LF.
+# NOT: Bu bir GIT politikasıdır (checkout/index normalizasyonu). Üretecin working
+# tree'ye CRLF yazmasını ENGELLEMEZ — üreteçler kendi newline ayarını doğru
+# yapmalıdır (bkz. artifact/vaka_seti/kur.py: lineterminator/newline="").
+* text=auto eol=lf
+
+# Metin dosyaları — açıkça LF
+*.csv   text eol=lf
+*.json  text eol=lf
+*.jsonl text eol=lf
+*.md    text eol=lf
+*.py    text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.txt   text eol=lf
+*.toml  text eol=lf
+*.sh    text eol=lf
+
+# İkili dosyalar — dönüşüm YOK (bozulmasın)
+*.docx binary
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.zip  binary

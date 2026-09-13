@@ -254,7 +254,9 @@ def dogrula(vakalar: list[dict]) -> None:
 def yaz_csv(vakalar: list[dict], path: Path) -> None:
     basliklar = ALANLAR + EK_ALANLAR
     with path.open("w", encoding="utf-8-sig", newline="") as f:  # utf-8-sig: Excel Türkçe uyumu
-        w = csv.DictWriter(f, fieldnames=basliklar, extrasaction="ignore")
+        # lineterminator="\n": csv varsayılanı \r\n'dir ve her çalıştırmada sahte
+        # git diff üretirdi (repodaki dosya LF). Bkz. kök .gitattributes.
+        w = csv.DictWriter(f, fieldnames=basliklar, extrasaction="ignore", lineterminator="\n")
         w.writeheader()
         for v in vakalar:
             w.writerow(v)
@@ -268,7 +270,11 @@ def yaz_json(vakalar: list[dict], path: Path) -> None:
         "alan_sirasi": ALANLAR,
         "vakalar": [{k: v[k] for k in ALANLAR + EK_ALANLAR} for v in vakalar],
     }
-    path.write_text(json.dumps(kayit, ensure_ascii=False, indent=2), encoding="utf-8")
+    # newline="": text mode'da \n -> os.linesep (Windows'ta \r\n) çevrilmesini engeller.
+    # Aksi halde üreteç Windows'ta CRLF yazıp CSV'deki sahte diff'in eşini üretirdi.
+    # (Not: newline="\n" de dokümante edilmiş eşdeğeridir; "" daha yaygın okunuyor.)
+    with path.open("w", encoding="utf-8", newline="") as f:
+        f.write(json.dumps(kayit, ensure_ascii=False, indent=2))
 
 
 def yaz_2x2(vakalar: list[dict], path: Path) -> str:
@@ -305,7 +311,9 @@ def yaz_2x2(vakalar: list[dict], path: Path) -> str:
                     "karşı-örnekleri için bkz. kaynaklar/provisioning-hypothesis-evidence-audit.md "
                     "(13 vakalık denetim setinin dışındadır).")
     metin = "\n".join(satirlar) + "\n"
-    path.write_text(metin, encoding="utf-8")
+    # newline="": aynı gerekçe (Windows'ta \n -> CRLF çevrilmesini engeller).
+    with path.open("w", encoding="utf-8", newline="") as f:
+        f.write(metin)
     return metin
 
 
