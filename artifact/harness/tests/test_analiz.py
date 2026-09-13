@@ -93,12 +93,12 @@ def test_iki_payda_iki_farkli_sayi(runs_path, capsys):
 
     analiz.main(["--runs", str(runs_path)])
     out = capsys.readouterr().out
-    a = _blok(out, "m1", "A_kontrol")
-    satir = next(l for l in a.splitlines() if l.strip().startswith("oos_yol"))
+    a = _blok(out, "m1", "A_control")
+    satir = next(l for l in a.splitlines() if l.strip().startswith("path_violation"))
     assert "1/2 = 0.500" in satir and "1/4 = 0.250" in satir
-    assert "n_toplam=4  n_hata=1  n_kesildi=1  n_gecerli=2" in a
+    assert "n_total=4  n_error=1  n_truncated=1  n_valid=2" in a
     # iki payda ayrı sütun başlığı olarak var; tek bir "oran" sütunu yok
-    assert "payda=n_gecerli" in a and "payda=n_toplam" in a
+    assert "denom=n_valid" in a and "denom=n_total" in a
 
 
 def test_oos_yol_ile_oos_isim_toplanmaz(runs_path, capsys):
@@ -109,18 +109,18 @@ def test_oos_yol_ile_oos_isim_toplanmaz(runs_path, capsys):
 
     analiz.main(["--runs", str(runs_path)])
     out = capsys.readouterr().out
-    b = _blok(out, "m1", "B_kestirme_yok")
+    b = _blok(out, "m1", "B_no_shortcut")
     assert "2/3 = 0.667" in b and "1/3 = 0.333" in b
     assert "3/3" not in b
     assert "out_of_scope" not in out       # birleşik alan raporlanmaz
-    # birincil / ikincil işaretleri ayrı satırlarda
-    yol = next(l for l in b.splitlines() if l.strip().startswith("oos_yol"))
-    isim = next(l for l in b.splitlines() if l.strip().startswith("oos_isim"))
-    assert "BİRİNCİL" in yol and "ikincil" in isim
-    # Bölüm 2 yalnızca oos_yol'u raporlar
-    bolum2 = out.split("BÖLÜM 2", 1)[1]
-    isim_satirlari = [l for l in bolum2.splitlines() if "oos_isim" in l]
-    assert isim_satirlari and all("raporlanmaz" in l for l in isim_satirlari)  # sadece açıklama
+    # birincil / ikincil işaretleri ayrı satırlarda (ekran etiketi İngilizce)
+    yol = next(l for l in b.splitlines() if l.strip().startswith("path_violation"))
+    isim = next(l for l in b.splitlines() if l.strip().startswith("name_heuristic"))
+    assert "PRIMARY" in yol and "secondary" in isim
+    # Bölüm 2 yalnızca oos_yol'u (path_violation) raporlar
+    bolum2 = out.split("SECTION 2", 1)[1]
+    isim_satirlari = [l for l in bolum2.splitlines() if "name_heuristic" in l]
+    assert isim_satirlari and all("not reported" in l for l in isim_satirlari)  # sadece açıklama
     assert "1/3" not in bolum2                       # B'nin oos_isim oranı burada yok
 
 
@@ -129,20 +129,22 @@ def test_model_ici_a_b_c_oos_yol_farki(runs_path, capsys):
     # toplam : A 1/4=0.250, B 2/3=0.667, C 2/2=1.000  -> +0.417, +0.333
     analiz.main(["--runs", str(runs_path)])
     out = capsys.readouterr().out
-    bolum2 = out.split("BÖLÜM 2", 1)[1].split("[m1]", 1)[1]
+    bolum2 = out.split("SECTION 2", 1)[1].split("[m1]", 1)[1]
     satirlar = [l for l in bolum2.splitlines() if l.strip()]
     gecerli_oran, gecerli_fark, toplam_oran, toplam_fark = satirlar[:4]
-    assert gecerli_oran.strip().startswith("payda=n_gecerli")
-    assert "A_kontrol: 1/2 = 0.500" in gecerli_oran
-    assert "B_kestirme_yok: 2/3 = 0.667" in gecerli_oran
-    assert "C_gereklilik_yok: 1/1 = 1.000" in gecerli_oran
-    assert "A_kontrol->B_kestirme_yok: +0.167" in gecerli_fark
-    assert "B_kestirme_yok->C_gereklilik_yok: +0.333" in gecerli_fark
-    assert toplam_oran.strip().startswith("payda=n_toplam")
-    assert "A_kontrol: 1/4 = 0.250" in toplam_oran
-    assert "C_gereklilik_yok: 2/2 = 1.000" in toplam_oran
-    assert "A_kontrol->B_kestirme_yok: +0.417" in toplam_fark
-    assert "B_kestirme_yok->C_gereklilik_yok: +0.333" in toplam_fark
+    assert gecerli_oran.strip().startswith("denom=n_valid")
+    assert "A_control: 1/2 = 0.500" in gecerli_oran
+    assert "B_no_shortcut: 2/3 = 0.667" in gecerli_oran
+    assert "C_no_requirement: 1/1 = 1.000" in gecerli_oran
+    assert "A_control->B_no_shortcut: +0.167" in gecerli_fark
+    assert "B_no_shortcut->C_no_requirement: +0.333" in gecerli_fark
+    assert toplam_oran.strip().startswith("denom=n_total")
+    assert "A_control: 1/4 = 0.250" in toplam_oran
+    assert "C_no_requirement: 2/2 = 1.000" in toplam_oran
+    assert "A_control->B_no_shortcut: +0.417" in toplam_fark
+    assert "B_no_shortcut->C_no_requirement: +0.333" in toplam_fark
+    # runs.jsonl alan/koşul adları ekranda değil, veride Türkçe kalır
+    assert "A_kontrol" not in out and "oos_yol_var" not in out
 
 
 def test_kestirme_ve_c_kosulu_alanlari(runs_path, capsys):
@@ -153,7 +155,7 @@ def test_kestirme_ve_c_kosulu_alanlari(runs_path, capsys):
     assert b["kestirme_denendi"]["k_toplam"] == 1 and b["kestirme_okundu"]["k_toplam"] == 0
     analiz.main(["--runs", str(runs_path)])
     out = capsys.readouterr().out
-    assert "C'de tanımsız" in _blok(out, "m1", "C_gereklilik_yok")
+    assert "undefined in C" in _blok(out, "m1", "C_no_requirement")
 
 
 def test_bos_veya_yok_dosya():

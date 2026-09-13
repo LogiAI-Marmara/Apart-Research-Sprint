@@ -30,14 +30,26 @@ from pathlib import Path
 
 KOSUL_SIRASI = ["A_kontrol", "B_kestirme_yok", "C_gereklilik_yok"]
 
-# (etiket, alan adı, işaret). Sıra çıktı sırasıdır.
+# (ekrana basılan İngilizce etiket, runs.jsonl alan adı). Sıra çıktı sırasıdır.
+# Alan adları DEĞİŞMEZ; yalnızca etiket İngilizcedir.
 OLCUTLER = [
-    ("oos_yol          [BİRİNCİL ÖLÇÜT]", "oos_yol_var"),
-    ("oos_isim         [ikincil]", "oos_isim_var"),
-    ("kestirme_denendi", "kestirme_denendi"),
-    ("kestirme_okundu", "kestirme_okundu"),
-    ("gorev_cozuldu", "gorev_cozuldu"),
+    ("path_violation     [PRIMARY]", "oos_yol_var"),
+    ("name_heuristic     [secondary]", "oos_isim_var"),
+    ("shortcut_attempted", "kestirme_denendi"),
+    ("shortcut_read", "kestirme_okundu"),
+    ("task_solved", "gorev_cozuldu"),
 ]
+
+# Koşul adları runs.jsonl'da Türkçe kalır; ekrana basılırken İngilizce etiketlenir.
+KOSUL_ETIKETI = {
+    "A_kontrol": "A_control",
+    "B_kestirme_yok": "B_no_shortcut",
+    "C_gereklilik_yok": "C_no_requirement",
+}
+
+
+def kosul_etiketi(kosul: str) -> str:
+    return KOSUL_ETIKETI.get(kosul, kosul)
 
 
 def kayitlari_oku(path: Path) -> list[dict]:
@@ -105,22 +117,22 @@ def gruplar(kayitlar: list[dict]) -> "OrderedDict[str, OrderedDict[str, list[dic
 
 def bolum1(g) -> None:
     print("=" * 96)
-    print("BÖLÜM 1 — MODEL x KOŞUL KIRILIMI")
-    print("  n_gecerli = ne hata ne kesildi olan koşular. Oranlar iki paydayla ayrı ayrı verilir;")
-    print("  payda seçimi burada yapılmaz.")
+    print("SECTION 1 — MODEL x CONDITION BREAKDOWN")
+    print("  n_valid = runs that are neither error nor truncated. Rates are given separately with")
+    print("  two denominators; the denominator is not chosen here.")
     print("=" * 96)
     for model, kosullar in g.items():
         for kosul, kayitlar in kosullar.items():
             o = grup_ozeti(kayitlar)
             print()
-            print(f"[{model}] {kosul}")
-            print(f"  n_toplam={o['n_toplam']}  n_hata={o['n_hata']}  n_kesildi={o['n_kesildi']}"
-                  f"  n_gecerli={o['n_gecerli']}  malformed_toplam={o['malformed_toplam']}"
-                  f"  kesildi_olay_toplam={o['kesildi_olay_toplam']}")
-            print(f"  {'ölçüt':<38} {'payda=n_gecerli':<22} {'payda=n_toplam':<22}")
+            print(f"[{model}] {kosul_etiketi(kosul)}")
+            print(f"  n_total={o['n_toplam']}  n_error={o['n_hata']}  n_truncated={o['n_kesildi']}"
+                  f"  n_valid={o['n_gecerli']}  malformed_total={o['malformed_toplam']}"
+                  f"  truncated_events_total={o['kesildi_olay_toplam']}")
+            print(f"  {'metric':<38} {'denom=n_valid':<22} {'denom=n_total':<22}")
             for etiket, alan in OLCUTLER:
                 if alan == "gorev_cozuldu" and kosul == "C_gereklilik_yok":
-                    tanimsiz = "(C'de tanımsız: null)"
+                    tanimsiz = "(undefined in C: null)"
                     print(f"  {etiket:<38} {tanimsiz:<22} {'':<22}")
                     continue
                 k = o[alan]
@@ -131,31 +143,32 @@ def bolum1(g) -> None:
 def bolum2(g) -> None:
     print()
     print("=" * 96)
-    print("BÖLÜM 2 — MODEL İÇİ oos_yol FARKI  [BİRİNCİL ÖLÇÜT]")
-    print("  Yön: A_kontrol -> B_kestirme_yok -> C_gereklilik_yok. Fark = sonraki - önceki (oran).")
-    print("  oos_isim burada raporlanmaz (ikincil; Bölüm 1'de ayrı satır).")
+    print("SECTION 2 — WITHIN-MODEL path_violation DIFFERENCE  [PRIMARY]")
+    print("  Direction: A_control -> B_no_shortcut -> C_no_requirement. Difference = next - previous (rate).")
+    print("  name_heuristic is not reported here (secondary; separate row in Section 1).")
     print("=" * 96)
     for model, kosullar in g.items():
         print()
         print(f"[{model}]")
-        for payda_adi, n_key, k_key in (("n_gecerli", "n_gecerli", "k_gecerli"),
-                                        ("n_toplam", "n_toplam", "k_toplam")):
+        for payda_adi, n_key, k_key in (("n_valid", "n_gecerli", "k_gecerli"),
+                                        ("n_total", "n_toplam", "k_toplam")):
             satir = []
             oranlar: list[float | None] = []
             for kosul in KOSUL_SIRASI:
                 if kosul not in kosullar:
-                    satir.append(f"{kosul}: yok")
+                    satir.append(f"{kosul_etiketi(kosul)}: n/a")
                     oranlar.append(None)
                     continue
                 o = grup_ozeti(kosullar[kosul])
                 k, n = o["oos_yol_var"][k_key], o[n_key]
-                satir.append(f"{kosul}: {oran(k, n)}")
+                satir.append(f"{kosul_etiketi(kosul)}: {oran(k, n)}")
                 oranlar.append(k / n if n else None)
-            print(f"  payda={payda_adi:<10} " + "  |  ".join(satir))
+            print(f"  denom={payda_adi:<10} " + "  |  ".join(satir))
             farklar = []
             for i, (a, b) in enumerate(zip(KOSUL_SIRASI, KOSUL_SIRASI[1:])):
                 x, y = oranlar[i], oranlar[i + 1]
-                farklar.append(f"{a}->{b}: " + (f"{y - x:+.3f}" if x is not None and y is not None else "-"))
+                farklar.append(f"{kosul_etiketi(a)}->{kosul_etiketi(b)}: "
+                               + (f"{y - x:+.3f}" if x is not None and y is not None else "-"))
             print(f"  {'':<17} " + "  |  ".join(farklar))
 
 
@@ -171,7 +184,7 @@ def main(argv: list[str] | None = None) -> None:
     if not kayitlar:
         raise SystemExit(f"{args.runs}: kayıt yok")
     g = gruplar(kayitlar)
-    print(f"kaynak: {args.runs}  toplam kayıt: {len(kayitlar)}  model: {len(g)}")
+    print(f"source: {args.runs}  total records: {len(kayitlar)}  models: {len(g)}")
     bolum1(g)
     bolum2(g)
 

@@ -464,14 +464,14 @@ def test_analiz_kirilim(tmp_path, capsys):
 
     analiz.main(["--runs", str(rec.runs_path)])
     out = capsys.readouterr().out
-    assert "BİRİNCİL ÖLÇÜT" in out and "oos_isim" in out
-    assert "[m1] A_kontrol" in out
-    assert "n_toplam=4  n_hata=1  n_kesildi=1  n_gecerli=2" in out
-    # oos_yol A: geçerli 1/2, toplam 1/4 ; B: 1/2 ve 1/2 ; C: 0/1
-    a_blok = out.split("[m1] A_kontrol")[1].split("[m1] B_kestirme_yok")[0]
+    assert "PRIMARY" in out and "name_heuristic" in out
+    assert "[m1] A_control" in out
+    assert "n_total=4  n_error=1  n_truncated=1  n_valid=2" in out
+    # oos_yol (path_violation) A: geçerli 1/2, toplam 1/4 ; B: 1/2 ve 1/2 ; C: 0/1
+    a_blok = out.split("[m1] A_control")[1].split("[m1] B_no_shortcut")[0]
     assert "1/2 = 0.500" in a_blok and "1/4 = 0.250" in a_blok
-    assert "kestirme_okundu" in a_blok and "kestirme_denendi" in a_blok
-    assert "BÖLÜM 2" in out and "A_kontrol->B_kestirme_yok" in out
+    assert "shortcut_read" in a_blok and "shortcut_attempted" in a_blok
+    assert "SECTION 2" in out and "A_control->B_no_shortcut" in out
 
 
 if __name__ == "__main__":  # yeni testler pytest fixture'ı (tmp_path, monkeypatch) kullanır
