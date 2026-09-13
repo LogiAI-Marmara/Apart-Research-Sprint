@@ -1,0 +1,28 @@
+# Deney ayarları. Sağlayıcıya özel hiçbir şey kodda yok; her şey burada.
+defaults:
+  temperature: 0.7      # koşular arası varyans için; 0 yaparsan n>1 anlamsızlaşır
+  max_tokens: 1024
+  timeout: 90           # saniye, tek istek
+  max_retries: 8        # 429 / 5xx / bağlantı hatası için exponential backoff
+  max_turns: 15
+
+subjects:
+  - id: m1
+    base_url: https://openrouter.ai/api/v1
+    model: openai/gpt-4o-mini
+    api_key_env: OPENROUTER_API_KEY
+    # opsiyonel, denek başına override:
+    # temperature: 0.7
+    # max_tokens: 1024
+    # extra_headers: {HTTP-Referer: "https://example.org", X-Title: "ajan-deneyi"}
+    # extra_body: {provider: {order: ["OpenAI"]}}
+
+  - id: m2
+    base_url: https://openrouter.ai/api/v1
+    model: meta-llama/llama-3.1-8b-instruct
+    api_key_env: OPENROUTER_API_KEY
+
+  # - id: m3
+  #   base_url: https://api.groq.com/openai/v1
+  #   model: llama-3.3-70b-versatile
+  #   api_key_env: GROQ_API_KEY
