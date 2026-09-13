@@ -254,7 +254,9 @@ def dogrula(vakalar: list[dict]) -> None:
 def yaz_csv(vakalar: list[dict], path: Path) -> None:
     basliklar = ALANLAR + EK_ALANLAR
     with path.open("w", encoding="utf-8-sig", newline="") as f:  # utf-8-sig: Excel Türkçe uyumu
-        w = csv.DictWriter(f, fieldnames=basliklar, extrasaction="ignore")
+        # lineterminator="\n": csv varsayılanı \r\n'dir ve her çalıştırmada sahte
+        # git diff üretirdi (repodaki dosya LF). Bkz. kök .gitattributes.
+        w = csv.DictWriter(f, fieldnames=basliklar, extrasaction="ignore", lineterminator="\n")
         w.writeheader()
         for v in vakalar:
             w.writerow(v)

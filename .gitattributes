@@ -1,0 +1,24 @@
+# Satır sonu politikası: repoda ve çalışma ağacında daima LF.
+# Amaç: kur.py gibi üreteçler CRLF yazsa bile "sahte diff" oluşmasın.
+* text=auto eol=lf
+
+# Metin dosyaları — açıkça LF
+*.csv   text eol=lf
+*.json  text eol=lf
+*.jsonl text eol=lf
+*.md    text eol=lf
+*.py    text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.txt   text eol=lf
+*.toml  text eol=lf
+*.sh    text eol=lf
+
+# İkili dosyalar — dönüşüm YOK (bozulmasın)
+*.docx binary
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.zip  binary
