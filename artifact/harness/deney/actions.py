@@ -54,6 +54,22 @@ MEANINGFUL_TOKENS = {
 _ACTION_RE = re.compile(r"^[ \t]*(?:`+)?[ \t]*ACTION\s*:\s*([A-Za-z_][\w.]*)\s*\(", re.M | re.I)
 _KW_RE = re.compile(r"(^|,)(\s*)[A-Za-z_]\w*\s*=\s*")
 _THINK_RE = re.compile(r"<think>.*?</think>", re.S)
+_THINK_OPEN_RE = re.compile(r"<think>")
+
+
+def think_temizle(text: str) -> tuple[str, bool]:
+    """Kapalı <think>...</think> bloklarını siler. (temiz_metin, muhakeme_kesik) döner.
+
+    Kapalı bloklar silindikten sonra hâlâ açık bir <think> kalıyorsa (kapanış etiketi yok ya da
+    "</think" gibi yarım), açılış noktasından metnin SONUNA kadar her şey atılır ve
+    muhakeme_kesik=True döner: max_tokens muhakemeyi ortadan kesmiştir, içindeki ACTION satırları
+    düşünce/seçenek tartmasıdır, uygulanan aksiyon değil; puanlanmamalıdır.
+    """
+    t = _THINK_RE.sub("", text or "")
+    m = _THINK_OPEN_RE.search(t)
+    if m is None:
+        return t, False
+    return t[:m.start()], True
 
 
 @dataclass
@@ -125,8 +141,11 @@ def parse_action(text: str) -> tuple[ParsedAction | None, str]:
     Son eşleşme alınır: düzyazıyla muhakeme eden bir model ("ACTION: run_shell(...)
     yazabilirdim ama izin yok, onun yerine...") ilk satırıyla puanlanmamalı; uygulanan
     aksiyon en sondakidir. Ham çıktının tamamı transcript'te zaten saklanır.
+
+    <think> blokları (kapalı ya da kesik) önce atılır; bkz. think_temizle. Kesiklik bilgisine
+    ihtiyaç duyan çağıran think_temizle'yi ayrıca çağırır.
     """
-    t = _THINK_RE.sub("", text or "")
+    t, _ = think_temizle(text)
     matches = list(_ACTION_RE.finditer(t))
     if not matches:
         return None, "ACTION satırı yok"

@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -69,6 +70,15 @@ def kosulari_kos(
                     )
 
 
+def temizle(rec: Recorder) -> None:
+    """--fresh: runs.jsonl'ı ve transcripts/ içeriğini siler; dizin boş olarak yeniden kurulur."""
+    if rec.runs_path.exists():
+        rec.runs_path.unlink()
+    if rec.tr_dir.is_dir():
+        shutil.rmtree(rec.tr_dir)
+    rec.tr_dir.mkdir(parents=True, exist_ok=True)
+
+
 def smoke_dogrulama(rec: Recorder, subjects: list[SubjectConfig]) -> dict:
     """Sadece istenen üç şeyi ham olarak basar; geçen/kalan modelleri döner.
 
@@ -108,7 +118,8 @@ def main() -> None:
     ap.add_argument("--models", help="virgülle ayrılmış subject id listesi (varsayılan: hepsi)")
     ap.add_argument("--conditions", help="virgülle ayrılmış koşul listesi (varsayılan: hepsi)")
     ap.add_argument("--force", action="store_true", help="smoke kapısını atla")
-    ap.add_argument("--fresh", action="store_true", help="mevcut kayıtları görmezden gel (üzerine ekler)")
+    ap.add_argument("--fresh", action="store_true",
+                    help="mevcut kayıtları SİLER (runs.jsonl + transcripts/) ve sıfırdan başlar")
     args = ap.parse_args()
 
     load_dotenv(ROOT / ".env")
@@ -132,8 +143,8 @@ def main() -> None:
 
     if args.smoke:
         rec = Recorder(out / "smoke")
-        if args.fresh and rec.runs_path.exists():
-            rec.runs_path.unlink()
+        if args.fresh:
+            temizle(rec)
         kosulari_kos(subjects, defaults, 1, rec, kosullar, progress=False)
         if "A_kontrol" in kosullar:  # kapı için A_kontrol'ü 3'e tamamla (mevcut koşular atlanır)
             kosulari_kos(subjects, defaults, SMOKE_A_KOSU, rec, ["A_kontrol"], progress=False)
@@ -155,8 +166,8 @@ def main() -> None:
             raise SystemExit("smoke'u geçen model yok")
 
     rec = Recorder(out)
-    if args.fresh and rec.runs_path.exists():
-        rec.runs_path.unlink()
+    if args.fresh:
+        temizle(rec)
     kosulari_kos(subjects, defaults, args.n, rec, kosullar, progress=True)
 
 

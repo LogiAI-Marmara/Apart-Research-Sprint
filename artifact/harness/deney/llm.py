@@ -1,9 +1,10 @@
-"""LLM sağlayıcı soyutlaması. Tek interface: LLMClient.complete(messages) -> str."""
+"""LLM sağlayıcı soyutlaması. Tek interface: LLMClient.complete(messages) -> Yanit."""
 from __future__ import annotations
 
 import random
 import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 import requests
 
@@ -12,10 +13,25 @@ class LLMError(Exception):
     """Yeniden denemelerle de aşılamayan hata."""
 
 
+@dataclass
+class Yanit:
+    """Tek tamamlama sonucu.
+
+    metin         asistanın ham metin çıktısı (content). Muhakeme alanları (reasoning_content /
+                  reasoning) buraya ASLA konmaz: muhakeme aksiyon değildir.
+    finish_reason choices[0].finish_reason (ör. "stop", "length"); sağlayıcı vermediyse None.
+    bos_icerik    content boş/None geldi (muhakeme dolu olsa bile). Çağıran bunu KESILDI sayar.
+    """
+
+    metin: str
+    finish_reason: str | None = None
+    bos_icerik: bool = False
+
+
 class LLMClient(ABC):
     @abstractmethod
-    def complete(self, messages: list[dict]) -> str:
-        """messages: [{"role": ..., "content": ...}, ...] -> asistanın ham metin çıktısı."""
+    def complete(self, messages: list[dict]) -> Yanit:
+        """messages: [{"role": ..., "content": ...}, ...] -> Yanit (metin + finish_reason + bos_icerik)."""
         raise NotImplementedError
 
 
@@ -27,6 +43,11 @@ class OpenAICompatClient(LLMClient):
     """
 
     RETRY_STATUSES = {408, 409, 425, 429}
+    # 200 gövdesinde string olarak gelen geçici hata adları (alt-string eşleşmesi, küçük harf).
+    RETRY_CODE_NAMES = (
+        "rate_limit", "ratelimit", "overloaded", "server_error",
+        "service_unavailable", "timeout", "try_again",
+    )
 
     def __init__(
         self,
@@ -60,6 +81,24 @@ class OpenAICompatClient(LLMClient):
     def _retryable(self, status: int) -> bool:
         return status in self.RETRY_STATUSES or 500 <= status < 600
 
+    def _retryable_code(self, code) -> bool:
+        """200 gövdesindeki hata kodu geçici mi? int, sayısal string ya da bilinen hata adı."""
+        if isinstance(code, bool):
+            return False
+        if isinstance(code, int):
+            return self._retryable(code)
+        if isinstance(code, str):
+            c = code.strip()
+            if c.isdigit():
+                return self._retryable(int(c))
+            cl = c.lower()
+            return any(ad in cl for ad in self.RETRY_CODE_NAMES)
+        return False
+
+    def _retryable_body_error(self, err: dict) -> bool:
+        """err.code, err.status, err.http_status alanlarından herhangi biri geçici ise True."""
+        return any(self._retryable_code(err.get(k)) for k in ("code", "status", "http_status"))
+
     @staticmethod
     def _retry_after(resp: requests.Response) -> float | None:
         ra = resp.headers.get("Retry-After")
@@ -71,18 +110,24 @@ class OpenAICompatClient(LLMClient):
             return None
 
     @staticmethod
-    def _extract(data: dict) -> str:
+    def _extract(data: dict) -> Yanit:
         choices = data.get("choices") or []
         if not choices:
             raise LLMError(f"yanıtta 'choices' yok: {str(data)[:300]}")
-        msg = choices[0].get("message") or {}
+        secim = choices[0] if isinstance(choices[0], dict) else {}
+        msg = secim.get("message") or {}
         content = msg.get("content")
         if isinstance(content, list):  # bazı sağlayıcılar parça listesi döndürür
             content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
-        return content or ""
+        finish_reason = secim.get("finish_reason")
+        if finish_reason is not None and not isinstance(finish_reason, str):
+            finish_reason = str(finish_reason)
+        # content boşsa reasoning_content/reasoning metin yerine KONMAZ; sadece işaretlenir.
+        metin = content if isinstance(content, str) else ""
+        return Yanit(metin=metin, finish_reason=finish_reason, bos_icerik=(metin == ""))
 
     # --- ana çağrı -----------------------------------------------------------
-    def complete(self, messages: list[dict]) -> str:
+    def complete(self, messages: list[dict]) -> Yanit:
         url = f"{self.base_url}/chat/completions"
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -115,8 +160,8 @@ class OpenAICompatClient(LLMClient):
                     else:
                         err = data.get("error") if isinstance(data, dict) else None
                         if err:  # bazı sağlayıcılar hatayı 200 gövdesinde döndürür
-                            code = err.get("code") if isinstance(err, dict) else None
-                            if isinstance(code, int) and self._retryable(code):
+                            if isinstance(err, dict) and self._retryable_body_error(err):
+                                code = err.get("code", err.get("status", err.get("http_status")))
                                 last_err = f"gövde hatası {code}: {str(err)[:200]}"
                             else:
                                 raise LLMError(f"sağlayıcı hatası: {str(err)[:500]}")
