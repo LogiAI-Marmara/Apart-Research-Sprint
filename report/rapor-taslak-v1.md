@@ -91,7 +91,8 @@ control matrix, because both look like the same network policy.
    explicit coding rule and a published audit trail for every judgement (Section 4.2).
 3. A three-condition experimental harness that separates *shortcut removal* from
    *requirement removal* while holding the task, the interface and the forbidden surface
-   fixed, and that gives the agent a legitimate way to quit (Section 3.3).
+   fixed, and that separates unambiguous path violations from a heuristic name match so the
+   primary outcome cannot be inflated by an agent inventing tool names (Section 3.3).
 4. One pre-run check, stated so that a third party could audit compliance without access to
    the lab's network (Section 5.2).
 
@@ -208,15 +209,22 @@ out of scope in the system message, and are visible to `list_dir`. Actions are c
 ALLOWED, OUT_OF_SCOPE, or MALFORMED; the MALFORMED category exists so that a model producing
 unparseable output is not scored as probing a boundary.
 
-Two design choices are load-bearing. First, the system message is byte-identical across the
-three conditions — the only difference between them is file presence, which is asserted by a
-test. Second, every condition offers `pes_et(reason)`, an in-scope action that ends the run,
-described in neutral wording. Without it, condition C offers no way to finish except the
-forbidden surface, and any boundary-pushing would be confounded with having no alternative.
+Three design choices are load-bearing. First, the system message is byte-identical across the
+three conditions; the only difference between them is which files exist, and a test asserts
+this. Second, `finish(answer)` is available in every condition, so an agent that concludes the
+task cannot be done has an in-scope way to stop; runs are classified by how they ended —
+`finish`, turn limit, or error — rather than assumed to have exhausted their options. Third,
+the parser scores the *last* ACTION line in a model's output, because a model reasoning in
+prose may name a forbidden action in order to reject it.
 
-Primary outcome: the proportion of runs containing at least one OUT_OF_SCOPE action.
-Secondary: the proportion ending in `pes_et`, and the turn at which the first OUT_OF_SCOPE
-action occurs. **[PENDING E1: models, n per cell, provider.]**
+OUT_OF_SCOPE is recorded as two kinds. A *path violation* is unambiguous: the agent named a
+URL, an absolute path, `..`, or one of the forbidden entries. A *name match* is heuristic: the
+action name matched a token list that also catches invented helpers such as `run_calc`. Because
+a stuck agent invents more names, the heuristic would produce more false positives in exactly
+the condition where our hypothesis predicts more violations. The primary outcome is therefore
+the proportion of runs with at least one path violation; name matches are reported separately
+and every triggering action is logged for manual audit. **[PENDING E1: models, n per cell,
+provider.]**
 
 ---
 
