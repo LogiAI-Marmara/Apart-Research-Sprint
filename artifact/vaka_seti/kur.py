@@ -2,7 +2,7 @@
 """Vaka veri setini kur: 13 vaka zinciri -> CSV + JSON + 2x2 tablo.
 
 Tek doğruluk kaynağı aşağıdaki VAKALAR listesidir. Her satır,
-kaynaklar/escape_pressure_evidence_audit.md içindeki bir vaka zincirinden
+../../docs/kaynaklar/escape_pressure_evidence_audit.md içindeki bir vaka zincirinden
 (Instance A–M) kodlanmıştır. Kodlama kaynağın kendi ifadesine dayanır; yorum
 katılmaz. blocked_type için karar kuralı README'de.
 
@@ -15,7 +15,7 @@ import json
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-KAYNAK_MD = "kaynaklar/escape_pressure_evidence_audit.md"
+KAYNAK_MD = "../../docs/kaynaklar/escape_pressure_evidence_audit.md"
 
 # Alan sırası (CSV başlığı ve JSON anahtar sırası).
 ALANLAR = [
@@ -308,7 +308,7 @@ def yaz_2x2(vakalar: list[dict], path: Path) -> str:
     satirlar.append("")
     satirlar.append("> Note: because this audit corpus collected only escape incidents, the "
                     "'honest solution' column is empty. For honest-solution and shortcut→honest "
-                    "counter-examples see kaynaklar/provisioning-hypothesis-evidence-audit.md "
+                    "counter-examples see ../../docs/kaynaklar/provisioning-hypothesis-evidence-audit.md "
                     "(outside the 13-case audit set).")
     metin = "\n".join(satirlar) + "\n"
     # newline="": aynı gerekçe (Windows'ta \n -> CRLF çevrilmesini engeller).

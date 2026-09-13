@@ -1,6 +1,6 @@
 {
   "aciklama": "Under-provisioning ('escape pressure') hipotezi için vaka veri seti — 13 vaka zinciri.",
-  "kaynak_belge": "kaynaklar/escape_pressure_evidence_audit.md",
+  "kaynak_belge": "../../docs/kaynaklar/escape_pressure_evidence_audit.md",
   "vaka_sayisi": 13,
   "alan_sirasi": [
     "case_id",
