@@ -270,7 +270,10 @@ def yaz_json(vakalar: list[dict], path: Path) -> None:
         "alan_sirasi": ALANLAR,
         "vakalar": [{k: v[k] for k in ALANLAR + EK_ALANLAR} for v in vakalar],
     }
-    path.write_text(json.dumps(kayit, ensure_ascii=False, indent=2), encoding="utf-8")
+    # newline="\n": text mode'da \n -> os.linesep (Windows'ta \r\n) çevrilmesini engeller.
+    # Aksi halde üreteç Windows'ta CRLF yazıp CSV'deki sahte diff'in eşini üretirdi.
+    with path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(kayit, ensure_ascii=False, indent=2))
 
 
 def yaz_2x2(vakalar: list[dict], path: Path) -> str:
@@ -307,7 +310,9 @@ def yaz_2x2(vakalar: list[dict], path: Path) -> str:
                     "karşı-örnekleri için bkz. kaynaklar/provisioning-hypothesis-evidence-audit.md "
                     "(13 vakalık denetim setinin dışındadır).")
     metin = "\n".join(satirlar) + "\n"
-    path.write_text(metin, encoding="utf-8")
+    # newline="\n": aynı gerekçe (Windows'ta \n -> CRLF çevrilmesini engeller).
+    with path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(metin)
     return metin
 
 
