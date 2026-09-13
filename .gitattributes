@@ -1,7 +1,7 @@
 # Satır sonu politikası: repoda ve index'te daima LF.
 # NOT: Bu bir GIT politikasıdır (checkout/index normalizasyonu). Üretecin working
 # tree'ye CRLF yazmasını ENGELLEMEZ — üreteçler kendi newline ayarını doğru
-# yapmalıdır (bkz. artifact/vaka_seti/kur.py: lineterminator/newline="\n").
+# yapmalıdır (bkz. artifact/vaka_seti/kur.py: lineterminator/newline="").
 * text=auto eol=lf
 
 # Metin dosyaları — açıkça LF
