@@ -63,13 +63,20 @@ def test_2x2_lf():
 
 
 def test_idempotent():
-    """Aynı içerik iki kez yazılınca bayt-bayt aynı olmalı (sahte diff olmaz)."""
+    """Aynı dosyaya iki kez yazılınca bayt-bayt aynı kalmalı (sahte diff olmaz).
+
+    Not: iki AYRI dosyaya yazıp karşılaştırmak deterministikliği ölçer, idempotentliği
+    değil. Gerçek senaryo üretecin var olan bir dosyanın üzerine tekrar çalışmasıdır;
+    append mode ya da yalnızca üzerine yazarken tetiklenen bir regresyon ancak
+    aynı yola iki kez yazarak yakalanır.
+    """
     with tempfile.TemporaryDirectory() as d:
-        a, b = Path(d) / "a", Path(d) / "b"
-        for f in (a, b):
-            kur.yaz_csv(kur.VAKALAR, f.with_suffix(".csv"))
-        assert a.with_suffix(".csv").read_bytes() == b.with_suffix(".csv").read_bytes(), \
-            "İki ardışık üretim aynı baytları vermedi"
+        p = Path(d) / "cikti.csv"
+        kur.yaz_csv(kur.VAKALAR, p)
+        ilk = p.read_bytes()
+        kur.yaz_csv(kur.VAKALAR, p)          # aynı yola ikinci kez
+        assert p.read_bytes() == ilk, \
+            "İkinci üretim aynı baytları vermedi (idempotent değil — ör. append modu)"
     print("ok test_idempotent")
 
 
