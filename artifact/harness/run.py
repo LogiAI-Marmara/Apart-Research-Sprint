@@ -1,6 +1,6 @@
 """Deney sürücüsü.
 
-  python run.py --smoke      koşul başına 1 koşu, her model; sonunda doğrulama çıktısı
+  python run.py --smoke      koşul başına 1 koşu (A_kontrol 3 koşu), her model; sonunda doğrulama çıktısı
   python run.py --n 10       koşul başına 10 koşu, sadece smoke'u geçen modeller
 
 Smoke sonuçları results/smoke/ altına, tam koşu results/ altına yazılır.
@@ -21,6 +21,7 @@ from deney.recorder import Recorder
 from deney.sandbox import KOSULLAR
 
 ROOT = Path(__file__).resolve().parent
+SMOKE_A_KOSU = 3  # smoke'ta A_kontrol koşu sayısı; en az biri çözülürse model geçer
 
 
 def build_client(s: SubjectConfig, d: Defaults) -> OpenAICompatClient:
@@ -69,13 +70,18 @@ def kosulari_kos(
 
 
 def smoke_dogrulama(rec: Recorder, subjects: list[SubjectConfig]) -> dict:
-    """Sadece istenen üç şeyi ham olarak basar; geçen/kalan modelleri döner."""
+    """Sadece istenen üç şeyi ham olarak basar; geçen/kalan modelleri döner.
+
+    Kapı: A_kontrol SMOKE_A_KOSU kez koşulur, en az biri çözülürse model geçer
+    (temperature 0.7'de yetenekli bir model tek koşuda kaçırabilir).
+    """
     kayitlar = rec.kayitlar()
     gecen, kalan = [], []
     for s in subjects:
         a = [r for r in kayitlar if r["model_id"] == s.id and r["kosul"] == "A_kontrol"]
-        cozuldu = bool(a and a[-1]["gorev_cozuldu"])
-        print(f"{s.id} A_kontrol gorev_cozuldu={cozuldu}")
+        cozulen = sum(1 for r in a if r["gorev_cozuldu"])
+        cozuldu = cozulen > 0
+        print(f"{s.id} A_kontrol gorev_cozuldu={cozuldu} ({cozulen}/{len(a)} koşu)")
         (gecen if cozuldu else kalan).append(s.id)
 
     print(f"MALFORMED toplam: {sum(r['malformed_sayisi'] for r in kayitlar)}")
@@ -95,7 +101,7 @@ def main() -> None:
             stream.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     g = ap.add_mutually_exclusive_group(required=True)
-    g.add_argument("--smoke", action="store_true", help="koşul başına 1 koşu, her model")
+    g.add_argument("--smoke", action="store_true", help="koşul başına 1 koşu (A_kontrol 3), her model")
     g.add_argument("--n", type=int, help="koşul başına koşu sayısı (tam deney)")
     ap.add_argument("--config", default=str(ROOT / "config" / "models.yaml"))
     ap.add_argument("--out", default=str(ROOT / "results"))
@@ -129,6 +135,8 @@ def main() -> None:
         if args.fresh and rec.runs_path.exists():
             rec.runs_path.unlink()
         kosulari_kos(subjects, defaults, 1, rec, kosullar, progress=False)
+        if "A_kontrol" in kosullar:  # kapı için A_kontrol'ü 3'e tamamla (mevcut koşular atlanır)
+            kosulari_kos(subjects, defaults, SMOKE_A_KOSU, rec, ["A_kontrol"], progress=False)
         sonuc = smoke_dogrulama(rec, subjects)
         smoke_ok_path.write_text(json.dumps(sonuc, ensure_ascii=False, indent=2), encoding="utf-8")
         return
