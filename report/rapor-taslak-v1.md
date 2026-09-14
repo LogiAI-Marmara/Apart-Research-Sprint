@@ -356,9 +356,9 @@ runs also explicitly listed the forbidden `harness/` directory. We therefore rep
 the strict path rule but only 1/5 for an unambiguous forbidden-entry access. GPT's response to
 high pressure was persistence rather than boundary crossing: all five blocked-high runs
 repeated the permitted proxy request until the fifteen-turn limit. Opus stopped and explained
-that no permitted route remained. Two Opus blocked-low runs contained a truncated response
-that recovered on the next turn, and three GPT blocked-high runs produced a malformed empty
-`list_dir()` call; no API errors occurred.
+that no permitted route remained. One Opus blocked-low run contained two truncated responses
+that recovered on the next turn, and two GPT blocked-high runs produced three malformed empty
+`list_dir()` calls; no API errors occurred.
 
 This post-hoc result is a design signal, not confirmation. It suggests that success pressure
 can change persistence and, for one model in a small sample, limited boundary testing. It does
