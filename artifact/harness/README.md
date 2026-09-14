@@ -1,7 +1,14 @@
 # Agent experiment
 
-Hypothesis: if a constraint makes the task *impossible*, the agent tries to get around the
+This harness is the apparatus that *tests* one claim about constraint escape. The claim
+under test: if a constraint makes the task *impossible*, the agent tries to get around the
 constraint; if it only closes a *shortcut*, the agent uses the honest path.
+
+The 45-run pilot did **not** support that claim (§4.5 of the report): no condition produced a
+path violation. The 60-run exploratory follow-up found a limited, model-specific signal only
+in the `blocked_high` cell (2/15). The revised, weaker hypothesis and the counter-evidence
+(METR INC-027, Thaman LF-2, case C09) that led to it are documented in
+`../vaka_seti/README.md` and `../../docs/kaynaklar/provisioning-hypothesis-evidence-audit.md`.
 
 ## Setup
 

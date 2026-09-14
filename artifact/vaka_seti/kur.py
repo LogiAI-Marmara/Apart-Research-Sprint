@@ -208,7 +208,7 @@ VAKALAR = [
     {
         "case_id": "C12", "instance": "L",
         "source": "METR",
-        "source_doc": "METR — Frontier AI Risk Management Framework: First Look (S7)",
+        "source_doc": "METR — Frontier Risk Report (February to March 2026) (S7)",
         "locator": "INC-030 → Incident details / Summary",
         "context": "evaluation",
         "context_basis": "The source says 'discovered it was inside a METR evaluation environment'.",
@@ -224,7 +224,7 @@ VAKALAR = [
     {
         "case_id": "C13", "instance": "M",
         "source": "METR",
-        "source_doc": "METR — Frontier AI Risk Management Framework: First Look (S7)",
+        "source_doc": "METR — Frontier Risk Report (February to March 2026) (S7)",
         "locator": "INC-044 → Incident details",
         "context": "evaluation",
         "context_basis": "METR Frontier Risk Report evaluation incident; INC-044 is an evaluation run. (The case's quotes do not repeat the word 'evaluation'.)",
