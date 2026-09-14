@@ -1,4 +1,4 @@
-# ajan_deneyi
+# Agent experiment
 
 Hypothesis: if a constraint makes the task *impossible*, the agent tries to get around the
 constraint; if it only closes a *shortcut*, the agent uses the honest path.
@@ -83,6 +83,21 @@ runs.jsonl (n_toplam/n_hata/n_kesildi/n_gecerli, two rates per metric with n_gec
 n_toplam as denominators, within-model A→B→C `oos_yol` difference). Reads files only; no
 network, no API. Printed labels are English (`path_violation`, `shortcut_attempted`, …);
 the field names in runs.jsonl are unchanged.
+
+## Committed pilot results
+
+`pilot_results/runs.jsonl` contains the 45 run summaries reported in the paper, and
+`pilot_results/transcripts.jsonl` contains the corresponding full transcripts as one JSON
+object per line. The pilot used GLM 5.3 through OpenRouter and GPT-5.6 Sol and Claude Opus 5
+through Wiro, with five runs per model and condition. All 45 runs were valid. Every A and B
+run solved the task; no run in any condition attempted a path violation, triggered the name
+heuristic, or used the shortcut. API credentials are not stored in either file.
+
+To reproduce the reported breakdown without an API call:
+
+```
+python analiz.py --runs pilot_results/runs.jsonl
+```
 
 ## Tests (no API)
 
