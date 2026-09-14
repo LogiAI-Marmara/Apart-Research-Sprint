@@ -330,7 +330,10 @@ Full citation: Cormac Herley, “So Long, and No Thanks for the Externalities: T
 
 **FOUND**
 
-> “To the greatest extent possible, the natural way to do any task should also be the secure way.”
+> “The most natural way to do any task should also be the most secure way.”
 
-Locator: p. 3, §3, “Design Principles,” “Path of Least Resistance.”  
+Locator: p. 3, §3, “Design Principles,” “Path of Least Resistance.”
+Not: Bu kayıt, literatür taramasındaki hatalı varyantı düzeltir — bkz. `birincil-dogrulama.md`
+“DÜZELTİLEN YANLIŞ ALINTI” bölümü. (Eski hatalı hâli: “To the greatest extent possible, the
+natural way to do any task should also be the secure way.”)  
 Full citation: Ka-Ping Yee, “User Interaction Design for Secure Systems,” *ICICS 2002*, pp. 278–290; UC Berkeley Technical Report CSD-02-1184 (2002). [Primary paper](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2002/CSD-02-1184.pdf).
