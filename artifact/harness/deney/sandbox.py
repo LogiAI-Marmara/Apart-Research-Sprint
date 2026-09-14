@@ -104,43 +104,51 @@ def sandbox_olustur(kosul: str, base_dir: Path | None = None) -> Path:
 # Aksiyon çalıştırma
 # ----------------------------------------------------------------------------
 def calistir(action: ParsedAction, cls: Classification, root: Path) -> str:
-    """Aksiyonu çalıştırır, OBSERVATION metnini döner. ALLOWED olmayan hiçbir şey çalışmaz."""
+    """Aksiyonu çalıştırır, OBSERVATION metnini döner. ALLOWED olmayan hiçbir şey çalışmaz.
+
+    Gövde try/except ile sarılmıştır (issue #12): beklenmeyen bir istisna (ör. yolda
+    NUL baytı → ValueError) OBSERVATION metnine dönüşür, koşuyu düşürmez. Aksi halde
+    tek bozuk çıktı tüm deney batch'ini abort edebiliyordu.
+    """
     if cls.kategori != "ALLOWED":
         return f"HATA: izin verilmedi ({cls.sebep}). Sadece sandbox içi yollar ve izinli aksiyonlar."
 
-    name = action.name.lower()
-    arg = action.args[0]
-    if name == "finish":
-        return ""
+    try:
+        name = action.name.lower()
+        arg = action.args[0]
+        if name == "finish":
+            return ""
 
-    yol = cls.yol
-    assert yol is not None
+        yol = cls.yol
+        assert yol is not None
 
-    if name == "list_dir":
-        if not yol.exists():
-            return f"HATA: dizin bulunamadı: {arg}"
-        if not yol.is_dir():
-            return f"HATA: dizin değil: {arg}"
-        girdiler = sorted(yol.iterdir(), key=lambda p: p.name.lower())
-        return "\n".join(p.name + ("/" if p.is_dir() else "") for p in girdiler) or "(boş)"
+        if name == "list_dir":
+            if not yol.exists():
+                return f"HATA: dizin bulunamadı: {arg}"
+            if not yol.is_dir():
+                return f"HATA: dizin değil: {arg}"
+            girdiler = sorted(yol.iterdir(), key=lambda p: p.name.lower())
+            return "\n".join(p.name + ("/" if p.is_dir() else "") for p in girdiler) or "(boş)"
 
-    if name == "read_file":
-        if not yol.exists():
-            return f"HATA: dosya bulunamadı: {arg}"
-        if yol.is_dir():
-            return f"HATA: bu bir dizin: {arg}"
-        icerik = yol.read_text(encoding="utf-8", errors="replace")
-        if len(icerik) > _MAX_OKUMA:
-            icerik = icerik[:_MAX_OKUMA] + f"\n...[kesildi, toplam {len(icerik)} karakter]"
-        return icerik
+        if name == "read_file":
+            if not yol.exists():
+                return f"HATA: dosya bulunamadı: {arg}"
+            if yol.is_dir():
+                return f"HATA: bu bir dizin: {arg}"
+            icerik = yol.read_text(encoding="utf-8", errors="replace")
+            if len(icerik) > _MAX_OKUMA:
+                icerik = icerik[:_MAX_OKUMA] + f"\n...[kesildi, toplam {len(icerik)} karakter]"
+            return icerik
 
-    if name == "write_file":
-        icerik = action.args[1]
-        yol.parent.mkdir(parents=True, exist_ok=True)
-        yol.write_text(icerik, encoding="utf-8")
-        return f"OK: {arg} dosyasına {len(icerik)} karakter yazıldı."
+        if name == "write_file":
+            icerik = action.args[1]
+            yol.parent.mkdir(parents=True, exist_ok=True)
+            yol.write_text(icerik, encoding="utf-8")
+            return f"OK: {arg} dosyasına {len(icerik)} karakter yazıldı."
 
-    return f"HATA: bilinmeyen aksiyon {name}"  # classify buraya düşürmez
+        return f"HATA: bilinmeyen aksiyon {name}"  # classify buraya düşürmez
+    except Exception as e:  # noqa: BLE001 — batch'i asla öldürme
+        return f"HATA: aksiyon çalıştırılamadı ({type(e).__name__}: {e})"
 
 
 # ----------------------------------------------------------------------------

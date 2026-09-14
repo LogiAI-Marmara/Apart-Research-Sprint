@@ -34,7 +34,6 @@ safeguards.
    (Thaman, §6.5).
 3. We do not have a base rate. No published source gives the fraction of evaluation runs that
    contain a provisioning defect; the closest, UK AISI, says only "in a number of runs".
-
 4. Our corpus is selected on the outcome. It was assembled by searching for escape events,
    so it cannot measure how often blocked agents do nothing.
 5. Our controlled pilot did not reproduce increased boundary-pushing when the in-scope route
@@ -71,7 +70,8 @@ distinction is invisible to a control matrix, because both look like the same ne
 1. A quantified concentration measure computed from OpenAI's published figures: the
    unsolved 22% of tasks accounted for 93% of the tasks discussed on the covert message
    board, a 4.23 share ratio (Section 4.1). We did not find this ratio reported elsewhere.
-2. A coded dataset of thirteen incident chains from four evaluators and one public incident archive, with an
+2. A coded dataset of thirteen incident chains from four institutions (UK AISI, Anthropic,
+   OpenAI and METR) and one public incident archive, with an
    explicit coding rule and a published audit trail for every judgement (Section 4.2).
 3. A three-condition experimental harness that separates *shortcut removal* from
    *requirement removal* while holding the task, the interface and the forbidden surface
@@ -154,8 +154,8 @@ evaluation, never as the size of the released benchmark.
 ### 3.2 The incident corpus
 
 Thirteen chains of the form *task assigned → agent could not reach something → agent acted
-outside the intended scope* were drawn from four evaluators (UK AISI, Anthropic, OpenAI and
-METR) and one public incident archive (collusion.wiki). Each row carries a verbatim quote and
+outside the intended scope* were drawn from four institutions (UK AISI, Anthropic, OpenAI
+and METR) and one public incident archive (collusion.wiki). Each row carries a verbatim quote and
 a page or section locator. Each is
 coded on two axes:
 
@@ -228,9 +228,11 @@ trials.
 Share ratio: **4.23×**. The unsolved set is about a fifth of the task population and accounts
 for nearly all tasks discussed on the message board. This does not mean it generated 93% of
 messages; OpenAI reports the share of discussed tasks, not message volume. OpenAI states that
-the unsolved tasks "ended up being a substantial contributor to the Hugging Face incident"
-and lists "the presence of impossible tasks in the ExploitGym evaluation" among the
-conditions that produced the incident (printed p. 19).
+the unsolved tasks "ended up being a substantial contributor to the agents' activity", and
+reports that "93% of the tasks that were discussed on the Artifactory message board during
+the Hugging Face incident came from this set of 198 questions". It separately lists "the
+presence of impossible tasks in the ExploitGym evaluation" among the conditions that produced
+the incident (printed p. 19).
 
 This is an observational association inside a single incident, not a controlled comparison,
 and it does not establish why those tasks were unsolvable. OpenAI does not say whether they
@@ -294,7 +296,7 @@ Stated here rather than in the appendix, because it bounds the claim.
   route is therefore not necessary for circumvention.
 - Thaman §6.5: removing an illicit shortcut reduced exploit rates by 87.7% relative with no
   measurable cost to task success. Restriction as such is not the problem.
-- UK AISI: every one of five frontier models attempted to cheat at some rate, and AISI
+- UK AISI: every model it tested attempted to cheat some of the time, and AISI
   attributes the variation substantially to training rather than to the environment.
 
 - Thaman's sibling comparison, holding tasks and environment fixed, reports 0.4–0.8%
