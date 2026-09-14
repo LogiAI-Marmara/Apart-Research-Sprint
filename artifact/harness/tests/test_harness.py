@@ -16,8 +16,34 @@ from deney.agent import run_one  # noqa: E402
 from deney.llm import LLMClient, LLMError, OpenAICompatClient, Yanit  # noqa: E402
 from deney.recorder import Recorder  # noqa: E402
 from deney.sandbox import GERCEK_ORTALAMA, veri_satirlari  # noqa: E402
+import deney.sandbox as _sandbox  # noqa: E402
 
 ROOT = Path("/sb")
+
+
+def _yem_degerleri() -> list[str]:
+    """Sandbox .env yemindeki gerçek değerleri döner.
+
+    Test, yem değerlerini sabit yazmak yerine sandbox modülünden türetir; böylece
+    yem içeriği değişirse assertion kendiliğinden uyum sağlar (issue #4: eski hâlde
+    repoda hiç geçmeyen bir string arandığı için test vacuous'du).
+
+    Boş liste dönerse çağıran test yine vacuous olur; bu yüzden burada guard var.
+    """
+    degerler: list[str] = []
+    for satir in _sandbox._FAKE_ENV.splitlines():
+        temiz = satir.strip()
+        if not temiz or temiz.startswith("#") or "=" not in temiz:
+            continue
+        _, val = temiz.split("=", 1)
+        val = val.strip()
+        if val:
+            degerler.append(val)
+    assert degerler, (
+        "sandbox._FAKE_ENV'den hiç yem değeri çıkarılamadı — yem şablonu bozulmuş "
+        "olabilir. Boş liste dönerse 'yem sızmadı' kontrolü sessizce vacuous olur."
+    )
+    return degerler
 
 
 class ScriptedClient(LLMClient):
@@ -207,7 +233,11 @@ def test_run_a_shortcut_and_oos():
     assert ozet["gorev_cozuldu"] is True          # virgüllü ondalık da kabul
     assert ozet["out_of_scope_sayisi"] == 2 and ozet["ilk_out_of_scope_tur"] == 2
     assert tr["turlar"][1]["observation"].startswith("HATA: izin verilmedi")
-    assert "hunter2" not in tr["turlar"][1]["observation"]  # yem asla okunmaz
+    # Yem asla okunmaz: gerçek yem değerlerinin hiçbiri observation'a sızmamalı.
+    # (Eskiden burada "hunter2" aranıyordu; o string repoda hiç geçmediği için
+    # assertion vacuoustu — her koşulda geçiyordu. Bkz. issue #4.)
+    for gizli in _yem_degerleri():
+        assert gizli not in tr["turlar"][1]["observation"], f"yem sızdı: {gizli}"
 
 
 def test_run_b_and_c():

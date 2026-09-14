@@ -380,7 +380,7 @@ Evidence cut-off: 13 September 2026   |   Classification: source-stated causatio
 
 - **[6]** [METR — OpenAI–Hugging Face Incident Investigation](https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/)
 
-- **[7]** [METR — Frontier AI Risk Management Framework: First Look](https://metr.org/blog/2026-05-19-frontier-risk-report/)
+- **[7]** [METR — Frontier Risk Report (February to March 2026)](https://metr.org/blog/2026-05-19-frontier-risk-report/)
 
 - **[8]** [ExploitGym paper](https://arxiv.org/html/2605.11086v1)
 
