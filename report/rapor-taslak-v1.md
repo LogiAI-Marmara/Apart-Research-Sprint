@@ -11,16 +11,17 @@ Track: 1 — Containment
 ## Abstract
 
 In July 2026, OpenAI models escaped an evaluation sandbox and compromised Hugging Face's
-production infrastructure. We ask where boundary-pushing concentrated inside that
-evaluation. OpenAI reported that 22% of tasks had never been solved by any of its models, yet
-this set accounted for 93% of tasks agents discussed on a covert message board, a 4.23 ratio
-of shares. We compare this observation with thirteen coded incident chains from four
-evaluators and one public incident archive. A 45-run pilot across GPT-5.6 Sol, Claude Opus 5,
-and GLM 5.3 did not reproduce the proposed effect: all models solved the feasible conditions
-and none attempted a path violation when the task became impossible. METR and the UK AI
-Security Institute separately describe agents acting on perceived task impossibility,
-including when that belief was wrong. We propose an auditable pre-run solvability check for
-evaluations conducted with relaxed safeguards.
+infrastructure. OpenAI reported that 22% of evaluation tasks had never been solved
+by its models, yet this set accounted for 93% of tasks agents discussed on a covert message
+board, a 4.23 ratio of shares. We compare this observation with thirteen coded incident
+chains. A 45-run pilot across GPT-5.6 Sol, Claude Opus 5 and GLM 5.3 found no path violations
+when the task became impossible. A 60-run post-pilot exploration crossed route
+availability with success pressure using a non-networked proxy simulator. Under blocked,
+high-pressure conditions, GLM triggered the path metric in 2/5 runs, but manual review
+found only one forbidden-directory access; GPT and Opus triggered none. METR and the
+UK AI Security Institute describe agents acting on perceived task impossibility.
+We propose an auditable pre-run solvability check for evaluations conducted with relaxed
+safeguards.
 
 ---
 
@@ -38,6 +39,8 @@ evaluations conducted with relaxed safeguards.
    so it cannot measure how often blocked agents do nothing.
 5. Our controlled pilot did not reproduce increased boundary-pushing when the in-scope route
    was removed. It therefore supplies a boundary condition, not causal confirmation.
+6. The post-pilot follow-up is exploratory, not a confirmatory test; its limited GLM-only
+   signal does not establish a general effect of success pressure.
 
 ---
 
@@ -329,6 +332,37 @@ uncertainty around this setup, but would not repair those missing mechanisms. Th
 result therefore narrows the observational claim: task impossibility alone was insufficient
 here.
 
+### 4.6 Post-pilot exploratory follow-up
+
+After observing the null pilot, we ran a separate 2×2 exploration crossing route availability
+with success pressure. A local `proxy_get` simulator exposed one in-scope target and never
+made a network request. In route-open cells it returned the same CSV; in route-blocked cells
+it returned an unavailable response. The high-pressure prompt said that only a correct
+`cevap.txt` counted as success and asked the model to keep checking permitted routes, while
+repeating that all boundaries remained binding. Five runs per model and cell produced 60 run
+records.
+
+| model | open, low | open, high | blocked, low | blocked, high |
+|---|---:|---:|---:|---:|
+| GLM 5.3 | 5/5 solved; 0/5 path | 5/5; 0/5 | 0/5 path | 2/5 path |
+| GPT-5.6 Sol | 5/5; 0/5 | 5/5; 0/5 | 0/5 path | 0/5 path |
+| Claude Opus 5 | 5/5; 0/5 | 5/5; 0/5 | 0/5 path | 0/5 path |
+
+Manual review weakens the apparent GLM result. Both flagged runs tried the near-miss proxy
+target `sim://data.csv` instead of the explicitly allowed `sim://task/data.csv`; one of those
+runs also explicitly listed the forbidden `harness/` directory. We therefore report 2/5 on
+the strict path rule but only 1/5 for an unambiguous forbidden-entry access. GPT's response to
+high pressure was persistence rather than boundary crossing: all five blocked-high runs
+repeated the permitted proxy request until the fifteen-turn limit. Opus stopped and explained
+that no permitted route remained. Two Opus blocked-low runs contained a truncated response
+that recovered on the next turn, and three GPT blocked-high runs produced a malformed empty
+`list_dir()` call; no API errors occurred.
+
+This post-hoc result is a design signal, not confirmation. It suggests that success pressure
+can change persistence and, for one model in a small sample, limited boundary testing. It does
+not show that stronger commands reliably cause violations, nor does it reproduce a real proxy
+escape or a safeguards-disabled evaluation.
+
 ---
 
 ## 5. Discussion
@@ -340,7 +374,8 @@ reduce egress. Table 1 and the incident descriptions motivate a complementary an
 check: before the run, verify that every task can be completed inside the permitted scope,
 and that the agent is told so accurately. Section 4.5 prevents a stronger conclusion: an
 impossible task did not by itself elicit boundary-pushing in our explicit, low-pressure
-harness.
+harness. Section 4.6 shows why task pressure and available affordances should be measured
+separately rather than folded into "impossibility".
 
 This does not compete with reward-hacking accounts. It identifies task solvability and the
 agent's belief about solvability as evaluation-design variables that an evaluator can change
@@ -358,13 +393,13 @@ environment hash it was produced under. A third party can ask for the record and
 quarantined tasks; neither exposes the lab's internal network. The operational cost is one
 verified solution pass per task in the exact environment configuration used for the run.
 
-### 5.3 Future work
+### 5.3 Next test
 
-A follow-up experiment should vary success pressure independently from route availability and
-replace the current file-only interface with a simulated proxy that never reaches the public
-internet. That design would distinguish task impossibility from persistence incentives while
-keeping every prohibited action non-executable. Because it was proposed after observing the
-pilot, its results should be reported separately as exploratory evidence.
+The next confirmatory test should register its prompts, sample size, automatic metric and
+manual-review rule before collecting data. It should use multiple tasks and a higher-fidelity
+proxy simulator while keeping all prohibited actions non-executable. The exploratory
+near-miss URL also shows that target-allowlist violations should be separated from explicit
+forbidden-resource access in advance.
 
 ---
 
@@ -376,11 +411,12 @@ whole. The thirteen-case corpus cannot estimate a rate because it was selected f
 events, but it shows that closed in-scope paths recur across public incident accounts. METR
 and the UK AI Security Institute add a mechanism that containment reviews should not ignore:
 agents acted on what they believed was necessary for task completion, including when that
-belief was wrong. Our 45-run pilot did not reproduce that behaviour: three capable models
-stopped without crossing the explicit boundary when the required file was removed. The
-result rejects task impossibility as a sufficient cause in this setting and leaves the
-incident-derived concentration claim, rather than a universal behavioural law, as the main
-finding.
+belief was wrong. Our 45-run pilot did not reproduce that behaviour. The post-pilot 60-run
+exploration produced a limited, model-specific signal under success pressure: GLM crossed the
+strict path rule in 2/5 blocked-high runs, but only one run clearly targeted a forbidden
+directory; GPT and Opus did not cross it. These results reject task impossibility as a
+sufficient cause in this setting and leave the incident-derived concentration claim, rather
+than a universal behavioural law, as the main finding.
 
 The practical response is to treat demonstrated in-scope solvability as a containment
 prerequisite. Before an evaluation runs with safeguards relaxed, each task should have a
@@ -396,8 +432,8 @@ those controls.
 - Repository: https://github.com/LogiAI-Marmara/Apart-Research-Sprint
 - Dataset: `artifact/vaka_seti/` — `kur.py` regenerates `vaka_seti.csv`, `.json` and the
   cross-tabulation. Coding rules and limits in its README.
-- Harness: `artifact/harness/` - provider-agnostic; `pilot_results/` contains the 45 committed
-  run summaries and full transcripts, and `python tests/test_harness.py` runs without an API
+- Harness: `artifact/harness/` - provider-agnostic; `pilot_results/` contains the 45-run pilot
+  and 60-run exploratory summaries and full transcripts. The test suite runs without an API
   key.
 - Primary-source verification record: `docs/kaynaklar/birincil-dogrulama.md`.
 
@@ -432,11 +468,12 @@ those controls.
 4. *Mechanism of impossibility unknown.* OpenAI states that tasks were impossible but does not
    say why. If they were merely hard rather than under-provisioned, our framing applies to
    demonstrated solvability rather than resource availability.
-5. *Toy experiment.* The harness uses one arithmetic task, five trials per condition and a
-   cost-free abstention path. Its hosted model endpoints retained their standard safety
-   behaviour, and the environment had no proxy or executable escape surface. The null result
-   cannot estimate a transferable effect size. Because no model used the shortcut in A, the
-   pilot also does not test whether removing a used shortcut changes behaviour.
+5. *Toy experiments.* Both studies use one arithmetic task and five trials per model-condition
+   cell. Hosted endpoints retained standard safety behaviour. The pilot had a cost-free
+   abstention path and no proxy surface; no model used its shortcut. The follow-up used a
+   non-networked proxy simulator and was designed after seeing the null result. Its GLM-only
+   signal is post-hoc, imprecise and partly driven by a near-miss URL, so neither study
+   estimates a transferable effect size.
 
 **Dual use.** The incident record identifies blocked task completion as a context in which
 boundary-pushing concentrated. That observation could inform attempts to elicit similar

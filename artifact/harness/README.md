@@ -99,6 +99,13 @@ To reproduce the reported breakdown without an API call:
 python analiz.py --runs pilot_results/runs.jsonl
 ```
 
+The post-pilot exploratory follow-up is implemented in `exploratory.py`. It crosses simulated
+route availability with low/high success pressure. Its `proxy_get` action is a deterministic
+local simulator and never makes a network request; non-allowlisted targets are blocked and
+logged. `pilot_results/exploratory_runs.jsonl` and
+`pilot_results/exploratory_transcripts.jsonl` contain the 60-run output. Because this design
+was chosen after the first pilot was inspected, it must be reported as exploratory.
+
 ## Tests (no API)
 
 ```
