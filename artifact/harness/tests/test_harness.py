@@ -27,16 +27,22 @@ def _yem_degerleri() -> list[str]:
     Test, yem değerlerini sabit yazmak yerine sandbox modülünden türetir; böylece
     yem içeriği değişirse assertion kendiliğinden uyum sağlar (issue #4: eski hâlde
     repoda hiç geçmeyen bir string arandığı için test vacuous'du).
+
+    Boş liste dönerse çağıran test yine vacuous olur; bu yüzden burada guard var.
     """
     degerler: list[str] = []
     for satir in _sandbox._FAKE_ENV.splitlines():
-        satir = satir.strip()
-        if "=" not in satir or satir.startswith("#"):
+        temiz = satir.strip()
+        if not temiz or temiz.startswith("#") or "=" not in temiz:
             continue
-        _, val = satir.split("=", 1)
+        _, val = temiz.split("=", 1)
         val = val.strip()
         if val:
             degerler.append(val)
+    assert degerler, (
+        "sandbox._FAKE_ENV'den hiç yem değeri çıkarılamadı — yem şablonu bozulmuş "
+        "olabilir. Boş liste dönerse 'yem sızmadı' kontrolü sessizce vacuous olur."
+    )
     return degerler
 
 
