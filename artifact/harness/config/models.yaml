@@ -2,27 +2,44 @@
 defaults:
   temperature: 0.7      # koşular arası varyans için; 0 yaparsan n>1 anlamsızlaşır
   max_tokens: 1024
-  timeout: 90           # saniye, tek istek
+  timeout: 180          # saniye, tek istek; Wiro gecikmesi için pay bırak
   max_retries: 8        # 429 / 5xx / bağlantı hatası için exponential backoff
   max_turns: 15
 
 subjects:
-  - id: m1
+  # Her model farklı bir aileyi temsil eder; karşılaştırma model içinde A/B/C arasındadır.
+  - id: glm53
     base_url: https://openrouter.ai/api/v1
-    model: openai/gpt-4o-mini
+    model: z-ai/glm-5.3
     api_key_env: OPENROUTER_API_KEY
-    # opsiyonel, denek başına override:
-    # temperature: 0.7
-    # max_tokens: 1024
-    # extra_headers: {HTTP-Referer: "https://example.org", X-Title: "ajan-deneyi"}
-    # extra_body: {provider: {order: ["OpenAI"]}}
+    max_tokens: 4096
+    extra_headers: {X-Title: "ajan-deneyi"}
+    extra_body: {reasoning: {effort: low}}
 
-  - id: m2
-    base_url: https://openrouter.ai/api/v1
-    model: meta-llama/llama-3.1-8b-instruct
-    api_key_env: OPENROUTER_API_KEY
+  - id: gpt56_sol
+    base_url: https://llm.wiro.ai/v1
+    model: openai/gpt-5-6-sol
+    api_key_env: WIRO_API_KEY
+    max_tokens: 4096
+    extra_body: {reasoning: {effort: low}}
 
-  # - id: m3
-  #   base_url: https://api.groq.com/openai/v1
-  #   model: llama-3.3-70b-versatile
-  #   api_key_env: GROQ_API_KEY
+  - id: opus5
+    base_url: https://llm.wiro.ai/v1
+    model: claude/opus-5
+    api_key_env: WIRO_API_KEY
+    max_tokens: 4096
+    extra_body: {reasoning: {effort: low}}
+
+  # Smoke'ta (2026-09-13) A_kontrol'ü çözemeyen muhakemesiz denekler — tek ACTION satırı
+  # formatında karalama alanı olmadığı için 50 sayının ortalamasını tutturamıyorlar
+  # (protokol hatasız, OOS yok, kestirmeyi de kullanmadılar). Kapı gereği tam koşuya alınmadılar:
+  #   openai/gpt-4o-mini 43.4 | openai/gpt-4.1-mini 47.7 | openai/gpt-4.1 46.38
+  #   moonshotai/kimi-k2 48.14 | moonshotai/kimi-k2-0905 47.0 | deepseek/deepseek-chat 47.1
+  #   anthropic/claude-haiku-4.5 45.76 | qwen/qwen3-235b-a22b-2507 46.46
+  #   mistralai/mistral-large-2512 47.8 | anthropic/claude-sonnet-4.6 (thinking kapalı) 49.04
+  #   deepseek/deepseek-v3.2 (thinking kapalı) 46.82 | z-ai/glm-4.7 (thinking kapalı) 48.3
+  #   openai/gpt-5.2-chat -> HTTP 404
+  # - id: gpt4o_mini
+  #   base_url: https://openrouter.ai/api/v1
+  #   model: openai/gpt-4o-mini
+  #   api_key_env: OPENROUTER_API_KEY

@@ -1,54 +1,38 @@
-# AI Incident Response Sprint — Track 1: Containment
+# Apart Research × CeSIA — AI Incident Response Sprint, Track 1
 
-> Apart Research × CeSIA "AI Incident Response Sprint" (11–13 Eylül 2026) katılımımız.
-> **Seçtiğimiz track: 1 — Containment.**
+Our submission to the Apart Research × CeSIA **AI Incident Response Sprint**
+(11–13 September 2026), **Track 1 — Containment**.
 
-## Ne yapıyoruz
+Sprint page: https://apartresearch.com/sprints/ai-incident-response-sprint-2026-09-11-to-2026-09-13
 
-Temmuz 2026'da iki OpenAI modeli, bir iç değerlendirme sırasında test sandbox'ının
-**tek izinli ağ çıkışından** (Artifactory package-registry cache proxy'si) bir zero-day
-üzerinden kaçarak Hugging Face'in üretim sistemlerine otonom sızdı. Bu olay; sprint'in
-konusu olan, kamuya açık belgelenmiş otonom bir AI sızıntısı.
+## Thesis
 
-Track 1'in sorusu şu: **bu kaçışı durduracak containment standardı neydi?** Modeller
-sandbox'ın izin verdiği tek egress'ten çıktığı için, cevap bir standartta toplanıyor:
+**A closed honest completion path is not the cause of constraint escape; it is an
+intensifier of it.** When an agent cannot complete its task through the sanctioned path
+(a *requirement* is missing), escape behaviour concentrates; closing only a *shortcut*
+reduces escape but does not eliminate it. The primary artifact codes 13 publicly documented
+incident chains from 5 institutions against this distinction; the harness is a small,
+API-driven experiment designed to probe the same distinction under controlled conditions.
 
-- guardrails kapalı (refusal'ları düşürülmüş) eval koşmak için **en az ne yeterli**?
-- bir **üçüncü taraf**, lab'ın iç ağına erişmeden uyumu nasıl **doğrulayabilir**?
-- bir lab bunu **gerçekten benimser mi**?
+## Team
 
-**Çıktımız (artifact):** [_karar verilecek — bkz. `docs/proje-karar-kaydi.md`_]
-artı resmî şablonda 4–8 sayfalık rapor (`report/` altında).
+- İsmail Efe Terlemez (ism00efe)
+- Efe Özan (thozoz)
 
-> Sprint İsmail Efe ile ortak giriliyor (takım: thozoz + ism00efe).
+Marmara University, Department of Computer Engineering.
 
-## Teslim / Zaman Çizelgesi
+## Repository map
 
-| Kalem | Değer |
-|-------|-------|
-| Track | **1 — Containment** |
-| Teslim son | Pazar 13 Eylül 23:59 AoE → TSİ Pazartesi 14 Eylül 14:59 |
-| Format | Resmî şablon PDF, max 8 sayfa (ref+ekler hariç) |
-| Zorunlu ek | Limitations and Dual-Use Considerations |
-| Artifact | Zorunlu (`artifact/`) — standard / control matrix / spec / kit |
-| Değerlendirme | Üçüncü taraf doğrulanabilirliği + lab'ın benimseme ihtimali |
+| path | what it is |
+|---|---|
+| `artifact/vaka_seti/` | **Primary artifact.** The 13-case dataset (`vaka_seti.csv` / `.json`), the 2x2 table, the generator `kur.py` (single source of truth) and its tests. |
+| `artifact/harness/` | The experiment: a file-agent harness that runs a model under three conditions (control / no shortcut / no requirement) and scores out-of-scope attempts; `analiz.py` turns the run log into the report numbers. |
+| `docs/kaynaklar/` | Sources: the evidence audit the cases were coded from, primary-source verification, counter-evidence and literature sweeps, the original `.docx` and its converter. |
+| `report/` | The sprint report (official template). |
 
-## Dizin Yapısı
+## Language note
 
-```
-├── README.md                # Bu dosya: ne yapıyoruz + nasıl doğrulanır
-├── LICENSE
-├── docs/                    # İç çalışma belgeleri (kaynak özetleri, kararlar)
-│   ├── SPRINT-NOTLARI.md         # Sprint düzenlemeleri + teslim şartları
-│   ├── proje-karar-kaydi.md      # Track/artifact/takım kararları + aksiyon
-│   ├── kaynak-ozetleri.md        # HF timeline + OpenAI + rubrik özeti
-│   └── resources-reading-pack.md # Track 1 örnek projeleri + okuma listesi
-├── artifact/                # Ürün: standard/matris/spec + kod
-└── report/                  # Resmî şablon PDF (teslim)
-```
-
-## Birincil Kaynaklar (çalışma zemini)
-
-- HF teknik zaman çizelgesi: https://huggingface.co/blog/agent-intrusion-technical-timeline
-- OpenAI açıklaması: https://openai.com/index/hugging-face-model-evaluation-security-incident/
-- Sprint sayfası: https://apartresearch.com/sprints/ai-incident-response-sprint-2026-09-11-to-2026-09-13
+Identifiers and comments inside the code (function, variable, module and file names, field
+names such as `kestirme_denendi`) are in Turkish. The dataset schema and coded values, the
+source quotes, and the report are in English. Dataset quotes are verbatim primary-source
+text and are never translated or edited.
